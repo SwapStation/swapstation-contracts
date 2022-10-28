@@ -6,6 +6,19 @@ We are using this to create dummy NFTs for testing and development of NFT Exchan
 See [README](https://github.com/SwapStation/swapstation-contracts) for setup instructions.
 
 ### Usage Instructions
+
+#### Pre-Requisite
+https://docs.near.org/tools/near-cli
+
+```
+npm install -g near-cli
+```
+#### NEAR Accounts Creation and Setup
+Create subaccount for nftsample
+```
+near create-account nftsample.swapstationio.testnet --masterAccount swapstationio.testnet --initialBalance 10
+```
+
 #### Deploying to Development Environment
 
 1. Open a new terminal.
@@ -29,45 +42,48 @@ near view $CONTRACT_NAME nft_metadata
 
 #### Deploying to Testnet
 
-1. Open a new terminal.
+1. Navigate to this folder, then Open a new terminal. Login to NEAR CLI if you haven't done so.
+
+```
+near login
+```
 
 2. Set the environment variable of the testnet account.
 ```
-export ID=jeffreylewis.testnet
+export NFTID=nftsample.swapstationio.testnet
 ```
 
 3. Deploy the contract to the testnet account.
 ```
-near deploy --wasmFile res/non_fungible_token.wasm --accountId nft.$ID
+near deploy --wasmFile res/non_fungible_token.wasm --accountId $NFTID
 ```
 
 4. Initialize the NFT contract and verify.
 ```
-near call nft.$ID new_default_meta '{"owner_id": "'nft.$ID'"}' --accountId nft.$ID
-near view nft.$ID nft_metadata
+near call $NFTID new_default_meta '{"owner_id": "'$NFTID'"}' --accountId $NFTID
+near view $NFTID nft_metadata
 ```
 
 #### Minting & Transferring
 
-1. Set the environment variable of the testnet account.
-```
-export ID=jeffreylewis.testnet
-```
-
-2. NFT Contract Functions
-
 **Mint**
 ```
-near call nft.$ID nft_mint '{"token_id": "0", "receiver_id": "'nft.$ID'", "token_metadata": { "title": "Olympus Mons", "description": "Tallest mountain in charted solar system", "media": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Olympus_Mons_alt.jpg/1024px-Olympus_Mons_alt.jpg", "copies": 1}}' --accountId nft.$ID --deposit 0.1
+export NFTID=swapstationio.testnet
+
+near call $NFTID nft_mint '{"token_id": "0", "receiver_id": "'$NFTID'", "token_metadata": { "title": "Olympus Mons", "description": "Tallest mountain in charted solar system", "media": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Olympus_Mons_alt.jpg/1024px-Olympus_Mons_alt.jpg", "copies": 1}}' --accountId $NFTID --deposit 0.1
 ```
 
 **Transfer**
 ```
-near call nft.$ID nft_transfer '{"token_id": "0", "receiver_id": "alice.'$ID'", "memo": "transfer ownership"}' --accountId nft.$ID --depositYocto 1
+export ALICEID=jeffreylewis-alice.testnet
+
+near call $NFTID nft_transfer '{"token_id": "0", "receiver_id": "'$ALICEID'", "memo": "transfer ownership"}' --accountId $NFTID --depositYocto 1
 ```
 
 **Get Owner Tokens**
 ```
-near view nft.$ID nft_tokens_for_owner '{"account_id": "'alice.$ID'"}'
-near view nft.$ID nft_tokens_for_owner '{"account_id": "'bob.$ID'"}'
+export BOBID=jeffreylewis-bob.testnet
+
+near view $NFTID nft_tokens_for_owner '{"account_id": "'$ALICEID'"}'
+near view $NFTID nft_tokens_for_owner '{"account_id": "'$BOBID'"}'
 ```

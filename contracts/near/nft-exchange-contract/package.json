@@ -7,7 +7,7 @@
     "test": "asp",
     "build": "asb",
     "login": "near login",
-    "deploy": "yarn build && near deploy --accountId contract.swapstationio.testnet --wasmFile build/release/swapstation.wasm",
+    "deploy": "yarn build && near deploy --accountId exchange.jeffreylewis.testnet --wasmFile build/release/swapstation.wasm",
     "deploy:dev": "yarn build && near dev-deploy --wasmFile build/release/swapstation.wasm"
   },
   "author": "Jeffrey Lewis",

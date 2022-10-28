@@ -1,31 +1,11 @@
 @nearBindgen
-export class ListingInfo {
-  listingId: i32;
-  seller: string;
-  tokenContract: string;
-  tokenId: string;
-  lookingFor: string;
-  tokenMeta: TokenMeta;
+export class SwapAgreement {
+  request_code: string;
+  offer_code: string;
+  maker: string;
+  taker: string;
+  request_nft_contract: string;
+  request_token_id: string;
+  offer_nft_contract: string;
+  offer_token_id: string;
 }
-
-@nearBindgen
-export class OfferInfo {
-  offerId: i32;
-  buyer: string;
-  offerTokenContract: string;
-  offerTokenId: string;
-  offerTokenMeta: TokenMeta;
-  listingId: i32;
-  seller: string;
-  listingTokenContract: string;
-  listingTokenId: string;
-  listingTokenMeta: TokenMeta;
-}
-
-@nearBindgen
-export class TokenMeta {
-  title: string;
-  description: string;
-  image: string;
-}
-
