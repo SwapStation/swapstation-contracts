@@ -16,7 +16,7 @@ near view $NFTID nft_tokens_for_owner '{"account_id": "'$ALICEID'"}'
 near view $NFTID nft_tokens_for_owner '{"account_id": "'$BOBID'"}'
 
 # View Token Metadata
-near view $NFTID nft_token '{"token_id": "1"}'
+near view $NFTID nft_token '{"token_id": "7"}'
 
 # Response:
 #  {
