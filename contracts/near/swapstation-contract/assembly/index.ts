@@ -1,11 +1,11 @@
-import { context, logging } from "near-sdk-as";
+import { context, ContractPromise, logging, u128 } from "near-sdk-as";
+import { JSON } from "assemblyscript-json"; 
 import { SwapAgreement } from "./models";
 import { NFTContractApi } from "./nftContractApi";
-import { get_contract_owner, set_contract_owner, swapAgreementStore } from "./storage";
+import { get_contract_owner, get_transfer_gas, set_contract_owner, set_fee, set_swap_expiry, set_transfer_gas, swapAgreementStore } from "./storage";
 
 // INIT
 
-// Initialize the contract with the owner. Can only be invoked once.
 export function init(owner_id: string): void {
     const contract_owner = get_contract_owner();
     if (contract_owner == "") {
@@ -15,25 +15,27 @@ export function init(owner_id: string): void {
     set_contract_owner(owner_id);
 }
 
+
 // OWNER ONLY METHODS
 
-export function update_fee(fee: number): void {
-
+export function owner_set_config_transfer_gas(gas: u64): void {
+    set_transfer_gas(gas);
 }
 
-export function update_swap_expiry(expiry_time: number): void {
-
+export function owner_set_config_fee(fee: u64): void {
+    assert(context.sender === get_contract_owner(), "This method can only be invoked by contract owner.");
+    set_fee(fee);
 }
 
-export function delete_swap_request(request_code: number): void {
-
+export function owner_set_config_swap_expiry(expiry_time: u64): void {
+    set_swap_expiry(expiry_time);
 }
 
-export function delete_swap_offer(offer_code: number): void {
-
+export function owner_delete_swap_agreement(request_code: string, offer_code: string): void {
+    remove_swap_agreement(request_code, offer_code);
 }
 
-export function close_expired_swaps(): void {
+export function owner_close_expired_swaps(): void {
 
 }
 
@@ -82,6 +84,7 @@ export function accept_swap_as_taker(
     offer_token_id: string): void {
 
     // Check fee
+    // const receivedAmount = context.attachedDeposit;
 
     // // Verify swap agreement
     const swapAgreement = get_swap_agreement(request_code, offer_code);
@@ -111,15 +114,24 @@ export function accept_swap_as_taker(
     nft_transfer(swapAgreement.request_nft_contract, swapAgreement.request_token_id, swapAgreement.taker);
 
     // Transfer from taker to maker
-    nft_transfer(swapAgreement.offer_nft_contract, swapAgreement.offer_token_id, swapAgreement.taker);
+    nft_transfer(swapAgreement.offer_nft_contract, swapAgreement.offer_token_id, swapAgreement.maker);
 
+    // TODO: this has to be handled on transfer callback
     // Delete agreement
-    remove_swap_agreement(request_code, offer_code);
+    // remove_swap_agreement(request_code, offer_code);
 
     logging.log("[accept_swap_as_maker] Successful: request_code: " + request_code + ", offer_code: " + offer_code);
 }
 
 // VIEW METHODS
+
+export function get_owner(): string {
+    return get_contract_owner();
+}
+
+export function get_transfer_gas_amount(): u64 {
+    return get_transfer_gas();
+}
 
 export function get_all_swap_agreements(): SwapAgreement[] {
     const result = new Array<SwapAgreement>(swapAgreementStore.length);
@@ -141,7 +153,6 @@ export function get_swap_agreement(request_code: string, offer_code: string): Sw
 }
 
 // EVENT HANDLERS
-
 // Respond to notification that contract has been granted approval for a token.
 //
 // Notes
@@ -158,11 +169,21 @@ export function get_swap_agreement(request_code: string, offer_code: string): Sw
 export function nft_on_approve(
     token_id: string,
     owner_id: string,
-    approval_id: number,
+    approval_id: u64,
     msg: string,
   ): void {
 
     logging.log("[nft_on_approve] Begin");
+    logging.log("[nft_on_approve] sender: " + context.sender);
+    logging.log("[nft_on_approve] predecessor: " + context.predecessor);
+    logging.log("[nft_on_approve] msg: " + msg);
+
+    let jsonObj: JSON.Obj = <JSON.Obj>(JSON.parse(msg));
+    let request_code_json: JSON.Str | null = jsonObj.getString("request_code");
+    if (request_code_json != null) {
+        let request_code: string = request_code_json.valueOf();
+        logging.log("[nft_on_approve] request_code: " + request_code);
+    }
 }
 
 // HELPERS
@@ -189,8 +210,6 @@ function remove_swap_agreement(request_code: string, offer_code: string): void {
 //     let api = new NFTContractApi();
 //     const promise = api.nft_token(token_contract, token_id)
 //     const response = promise.returnAsResult() as any;
-//     logging.log("[nft_is_approved]: " + response);
-
 //     return response.owner_id === account_id;
 // }
 
@@ -199,15 +218,12 @@ function remove_swap_agreement(request_code: string, offer_code: string): void {
 //     let api = new NFTContractApi();
 //     let promise = api.is_approved(token_contract, token_id, approved_account_id);
 //     const response = promise.returnAsResult() as any;
-
-//     logging.log("[nft_is_approved]: " + response);
-
-//     return true;    // TODO:
+//     return true;
 // }
 
 export function nft_transfer(nft_contract: string, token_id: string, to_account_id: string): void {
-    logging.log("[nft_transfer] Begin");
+    logging.log("[nft_transfer] Begin. nft_contract: " + nft_contract + ", token_id: " + token_id + ", to_account_id: " + to_account_id);
     let api = new NFTContractApi();
-    let promise = api.transfer(nft_contract, token_id, to_account_id);
+    let promise = api.transfer(nft_contract, token_id, to_account_id, get_transfer_gas());
     promise.returnAsResult();
 }

@@ -14,5 +14,8 @@
   "license": "ISC",
   "devDependencies": {
     "near-sdk-as": "^3.2.3"
+  },
+  "dependencies": {
+    "assemblyscript-json": "^1.1.0"
   }
 }
