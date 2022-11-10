@@ -1,9 +1,5 @@
 # Swap Station
 
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-intro-small.png" alt="">
-</p>
-
 #### Swap NFTs Across Blockchains
 
 [SwapStation.io](https://www.swapstation.io/) is a platform that facilitates NFT swaps in and across chains. Featuring a one of a kind marketplace for NFT collectors to showcase, discover, and swap NFTs across different blockchains.
@@ -83,7 +79,7 @@ Absolutely no gas fees required when importing, creating listings and making off
 
 - **SwapStation**: Smart Contracts repesenting the swap contract. This contract is responsible for the swap transaction that takes place when an offer is accepted. See [SwapStation Contract functions](#swap-station-contract-functions) for functions.
 
-- **NFT**: A sample ERC-721/NEP-171 NFT contract using [OpenZeppelin](https://www.openzeppelin.com/) standard. We are using this contract as a sample for developing and testing the integration with the application.
+- **NFT**: A sample contract using common standards for each network (ERC-721, NEP-177). We are using this contract as a sample for developing and testing the integration with the application.
 
 ## Developer Quick Start Guides
 
@@ -92,24 +88,3 @@ Absolutely no gas fees required when importing, creating listings and making off
 [TRON](/contracts/tron/README.md)
 
 [Ethereum](/contracts/ethereum/README.md)
-
-## Screenshots
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-intro-large.png" alt="">
-</p>
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-import.png" alt="">
-</p>
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-mycollection.png" alt="">
-</p>
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-makeoffer.png" alt="">
-</p>
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-viewlisting.png" alt="">
-</p>
-<p align="center">
-    <img src="https://raw.githubusercontent.com/SwapStation/swapstation-contracts/main/docs/screenshots/screenshot-myoffer.png" alt="">
-</p>
