@@ -3,6 +3,7 @@ import { JSON } from "assemblyscript-json";
 import { SwapAgreement } from "./models";
 import { NFTContractApi } from "./nftContractApi";
 import { get_contract_owner, get_transfer_gas, set_contract_owner, set_fee, set_swap_expiry, set_transfer_gas, swapAgreementStore } from "./storage";
+import { FungibleTokenAPI } from "./fungibleTokenApi";
 
 // INIT
 
@@ -48,15 +49,20 @@ export function accept_swap_as_maker(
     request_nft_contract: string, 
     request_token_id: string,
     offer_nft_contract: string, 
-    offer_token_id: string
+    offer_token_id: string,
+    offer_amount: u128,
     ): void {
+
+    // TODO: offer can be wither NFT or NEAR Tokens (Amount) or both
 
     // Verify token ownership
     const maker_address = context.sender;
     // assert(nft_is_token_owner(request_nft_contract, request_token_id, maker_address), "Maker does not own request token.");
 
     // // Verify approval
-    // assert(nft_is_approved(request_nft_contract, request_token_id, get_contract_owner()), "Contract owner is not approved to manage request token.");
+    // assert(nft_is_approved(request_nft_contract, request_token_id, get_contract_owner()), "SwapStation is not approved to manage request token.");
+
+    // TODO: Verify taker balance more than offer amount (Not necessary as checking can be upon taker accept)
 
     // Create the record
     const swap_agreement: SwapAgreement = {
@@ -67,7 +73,8 @@ export function accept_swap_as_maker(
         request_nft_contract: request_nft_contract,
         request_token_id: request_token_id,
         offer_nft_contract: offer_nft_contract,
-        offer_token_id: offer_token_id
+        offer_token_id: offer_token_id,
+        offer_amount: offer_amount,
     };
     swapAgreementStore.push(swap_agreement);
 
@@ -81,7 +88,10 @@ export function accept_swap_as_taker(
     request_nft_contract: string, 
     request_token_id: string,
     offer_nft_contract: string, 
-    offer_token_id: string): void {
+    offer_token_id: string, 
+    offer_amount: u128): void {
+
+    // NOTE: we receive above params to validate against maker's claim
 
     // Check fee
     // const receivedAmount = context.attachedDeposit;
@@ -92,6 +102,10 @@ export function accept_swap_as_taker(
         logging.log("[accept_swap_as_taker] Failed: Swap agreement not found.");
         return;
     }
+
+    // TODO: Verify maker's claim by checking trade agreement given by taker against the one made by maker
+
+    // TODO: Check if NFT, NFT + Crypto, or Crypto only
 
     // if (context.sender != swapAgreement.taker) {
     //     logging.log("[accept_swap_as_maker] Failed: maker does not own request token.");
@@ -110,11 +124,24 @@ export function accept_swap_as_taker(
     //     return;
     // }
 
+    // TODO: Verify taker balance more than offer amount (Not necessary as checking can be upon taker accept)
+
+    const hasNFT: boolean = swapAgreement.offer_nft_contract != "";
+    const hasTokens: boolean = swapAgreement.offer_amount && !swapAgreement.offer_amount.isZero();
+
+    if (hasTokens) {
+        // Send tokens from taker to maker
+        send_tokens(swapAgreement.offer_amount, swapAgreement.maker);
+    }
+
+    if (hasNFT) {
+        // Transfer from taker to maker
+        nft_transfer(swapAgreement.offer_nft_contract, swapAgreement.offer_token_id, swapAgreement.maker);
+    }
+
     // Transfer from maker to taker
     nft_transfer(swapAgreement.request_nft_contract, swapAgreement.request_token_id, swapAgreement.taker);
 
-    // Transfer from taker to maker
-    nft_transfer(swapAgreement.offer_nft_contract, swapAgreement.offer_token_id, swapAgreement.maker);
 
     // TODO: this has to be handled on transfer callback
     // Delete agreement
@@ -226,4 +253,10 @@ export function nft_transfer(nft_contract: string, token_id: string, to_account_
     let api = new NFTContractApi();
     let promise = api.transfer(nft_contract, token_id, to_account_id, get_transfer_gas());
     promise.returnAsResult();
+}
+
+export function send_tokens(amount: u128, to: string): void {
+    logging.log("[send_tokens] Begin. amount: " + amount.toString() + ", to: " + to);
+    let api = new FungibleTokenAPI();
+    api.sendNEAR(amount, to);
 }
