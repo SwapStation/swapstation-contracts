@@ -1,3 +1,5 @@
+import { u128 } from "near-sdk-as";
+
 @nearBindgen
 export class SwapAgreement {
   request_code: string;
@@ -8,4 +10,5 @@ export class SwapAgreement {
   request_token_id: string;
   offer_nft_contract: string;
   offer_token_id: string;
+  offer_amount: u128;
 }
