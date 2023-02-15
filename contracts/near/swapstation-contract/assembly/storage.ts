@@ -17,11 +17,18 @@ export const set_transfer_gas = (transfer_gas: u64): void => {
   storage.set("transfer_gas", transfer_gas);
 }
 
-export const get_fee = (): u64 => {
-  return storage.getPrimitive<u64>("fee", 0);
+export const get_fee_amount = (): u64 => {
+  return storage.getPrimitive<u64>("fee_amount", 0);
 }
-export const set_fee = (fee: u64): void => {
-  storage.set("fee", fee);
+export const set_fee_amount = (fee_amount: u64): void => {
+  storage.set("fee_amount", fee_amount);
+}
+
+export const get_fee_rate = (): u64 => {
+  return storage.getPrimitive<u64>("fee_rate", 0);
+}
+export const set_fee_rate = (fee_rate: u64): void => {
+  storage.set("fee_rate", fee_rate);
 }
 
 export const get_swap_expiry = (): u64 => {

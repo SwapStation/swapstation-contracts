@@ -2,14 +2,14 @@ import { context, ContractPromise, logging, u128 } from "near-sdk-as";
 import { JSON } from "assemblyscript-json"; 
 import { SwapAgreement } from "./models";
 import { NFTContractApi } from "./nftContractApi";
-import { get_contract_owner, get_transfer_gas, set_contract_owner, set_fee, set_swap_expiry, set_transfer_gas, swapAgreementStore } from "./storage";
+import { get_contract_owner, get_fee_amount, get_fee_rate, get_transfer_gas, set_contract_owner, set_fee_amount, set_fee_rate, set_swap_expiry, set_transfer_gas, swapAgreementStore } from "./storage";
 import { FungibleTokenAPI } from "./fungibleTokenApi";
 
 // INIT
 
 export function init(owner_id: string): void {
     const contract_owner = get_contract_owner();
-    if (contract_owner == "") {
+    if (contract_owner != "") {
         logging.log("[init] Failed: Contract already initialized.");
         return;
     }
@@ -23,9 +23,14 @@ export function owner_set_config_transfer_gas(gas: u64): void {
     set_transfer_gas(gas);
 }
 
-export function owner_set_config_fee(fee: u64): void {
+export function owner_set_config_fee_amount(amount: u64): void {
     assert(context.sender === get_contract_owner(), "This method can only be invoked by contract owner.");
-    set_fee(fee);
+    set_fee_amount(amount);
+}
+
+export function owner_set_config_fee_rate(rate: u64): void {
+    assert(context.sender === get_contract_owner(), "This method can only be invoked by contract owner.");
+    set_fee_rate(rate);
 }
 
 export function owner_set_config_swap_expiry(expiry_time: u64): void {
@@ -94,9 +99,15 @@ export function accept_swap_as_taker(
     // NOTE: we receive above params to validate against maker's claim
 
     // Check fee
-    // const receivedAmount = context.attachedDeposit;
+    const receivedAmount = context.attachedDeposit;
+    // const requiredFee = get_required_fee(offer_amount);
+    // if (receivedAmount < requiredFee) {
+    //     // TODO: refund attached deposit
+    //     logging.log("[accept_swap_as_maker] Failed: Insufficient service fee.");
+    //     return;
+    // }
 
-    // // Verify swap agreement
+    // Verify swap agreement
     const swapAgreement = get_swap_agreement(request_code, offer_code);
     if (!swapAgreement) {
         logging.log("[accept_swap_as_taker] Failed: Swap agreement not found.");
@@ -104,8 +115,6 @@ export function accept_swap_as_taker(
     }
 
     // TODO: Verify maker's claim by checking trade agreement given by taker against the one made by maker
-
-    // TODO: Check if NFT, NFT + Crypto, or Crypto only
 
     // if (context.sender != swapAgreement.taker) {
     //     logging.log("[accept_swap_as_maker] Failed: maker does not own request token.");
@@ -141,7 +150,6 @@ export function accept_swap_as_taker(
 
     // Transfer from maker to taker
     nft_transfer(swapAgreement.request_nft_contract, swapAgreement.request_token_id, swapAgreement.taker);
-
 
     // TODO: this has to be handled on transfer callback
     // Delete agreement
@@ -214,6 +222,11 @@ export function nft_on_approve(
 }
 
 // HELPERS
+// function get_required_fee(offer_amount: u128) {
+//     const fee_amount = get_fee_amount();
+//     const fee_rate = get_fee_rate();
+//     return fee_amount + (offer_amount * fee_rate);
+// }
 
 function remove_swap_agreement(request_code: string, offer_code: string): void {
 

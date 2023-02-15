@@ -8,7 +8,13 @@
 `yarn build`
 
 #### Login NEAR CLI
-`yarn login`
+`yarn login-near`
 
-#### Deploy
-`yarn deploy`
+#### Deploy to DEV
+`yarn deploy:dev`
+
+#### Deploy to TESTNET (contract.swapstationio.testnet)
+`yarn deploy:testnet`
+
+#### Deploy to MAINNET (contract.swapstationio)
+`yarn deploy:mainnet`

@@ -16,15 +16,17 @@ From the project root folder:
 ```
 *View packages/contract-nft/README.md for explanation of each steps.*
 
-2. Build and deploy the Exchange Contract
+2. Build and deploy the SwapStation Contract
 ```
 From the project root folder:
-> cd packages/contract-exchange
+> cd packages/swapstation-contract
 > yarn
 > yarn deploy:dev
 ```
 
 #### Interacting With the Contracts
+
+Note: Refer to /scripts folder for examples
 
 Example calls:
 
